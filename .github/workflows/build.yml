@@ -9,8 +9,6 @@ jobs:
   build-android:
     name: Export Godot APK
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/barichello/godot-ci:4.3.0
 
     steps:
       - name: Checkout code
@@ -18,13 +16,26 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Godot Export Templates
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Godot and Templates
         run: |
+          # Download Godot 4.3 headless voor Linux
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q Godot_v4.3-stable_linux.x86_64.zip
+          sudo mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+          sudo chmod +x /usr/local/bin/godot
+
+          # Download export templates
           mkdir -p ~/.local/share/godot/export_templates/4.3.stable
           wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
           unzip -q Godot_v4.3-stable_export_templates.tpz
           mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
-          rm Godot_v4.3-stable_export_templates.tpz
+          rm Godot_v4.3-stable_export_templates.tpz Godot_v4.3-stable_linux.x86_64.zip
 
       - name: Create build folder
         run: mkdir -p build/android
