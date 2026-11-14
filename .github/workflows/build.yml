@@ -1,0 +1,40 @@
+name: Build Quest 3 APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    name: Export Godot APK
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/barichello/godot-ci:4.3.0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Godot Export Templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+          unzip -q Godot_v4.3-stable_export_templates.tpz
+          mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
+          rm Godot_v4.3-stable_export_templates.tpz
+
+      - name: Create build folder
+        run: mkdir -p build/android
+
+      - name: Generate APK
+        run: |
+          godot --verbose --headless --export-release "Android" build/android/robot-control.apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: quest3-apk
+          path: build/android/robot-control.apk
