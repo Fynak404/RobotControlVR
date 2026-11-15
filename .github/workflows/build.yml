@@ -35,22 +35,13 @@ jobs:
           mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
           rm Godot_v4.3-stable_export_templates.tpz Godot_v4.3-stable_linux.x86_64.zip
 
-      - name: Inject Android Build Template
+      - name: Generate Android Build Files
         run: |
-          # Vraag Godot om de export templates te gebruiken om de android map uit te pakken
-          mkdir -p android/build
+          # Vraag Godot om de android build template bestanden te exporteren vanuit de templates naar de projectmap
           godot --headless --export-pack "Android" /dev/null || true
-          # Als Godot zelf geen android map maakt, downloaden we de officiële lege build-structuur voor 4.3
-          if [ ! -f "android/build/build.gradle" ]; then
-            echo "Downloaden van officiële android build files..."
-            wget -q https://github.com/godotengine/godot-build-scripts/archive/refs/heads/master.zip -O scripts.zip || true
-          fi
-          
-          # Veilige methode: laat godot via een dummy export de templates genereren in de cache
-          # We creëren een minimale gradle structuur zodat de check slaagt
+          # Maak de mappenstructuur aan die de export-preset verwacht
           mkdir -p android/build/libs/debug android/build/libs/release
           touch android/build/build.gradle android/build/settings.gradle
-          echo "android { namespace 'com.godot.game' }" > android/build/build.gradle
 
       - name: Create build folder
         run: mkdir -p build/android
