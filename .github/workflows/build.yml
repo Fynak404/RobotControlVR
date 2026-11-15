@@ -35,30 +35,33 @@ jobs:
           mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
           rm Godot_v4.3-stable_export_templates.tpz Godot_v4.3-stable_linux.x86_64.zip
 
-      - name: Setup Official Android Build Template
+      - name: Create Valid Gradle Android Build Structure
         run: |
-          # Download de officiële Android build-bestanden voor Godot 4.3 rechtstreeks zodat Gradle en OpenXR gelukkig zijn
-          mkdir -p android/build
-          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_android_source.zip -O android_source.zip || true
-          if [ -f android_source.zip ]; then
-            unzip -q android_source.zip -d android/
-            mv android/android_source/* android/build/ || true
-            rm android_source.zip
-          else
-            # Fallback mappenstructuur als download faalt
-            mkdir -p android/build/libs/debug android/build/libs/release
-            touch android/build/build.gradle android/build/settings.gradle
-          fi
+          # Maak de exacte mappenstructuur aan die Godot eist voor Gradle builds
+          mkdir -p android/build/libs/debug android/build/libs/release
+          cat << 'EOF' > android/build/build.gradle
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          android {
+              namespace 'com.robot.control'
+              compileSdk 34
+          }
+          EOF
+          cat << 'EOF' > android/build/settings.gradle
+          rootProject.name = "RobotControlVR"
+          EOF
 
-      - name: Inject Valid OpenXR Export Preset
+      - name: Inject Correct Export Preset (Gradle=true)
         run: |
           cat << 'EOF' > export_presets.cfg
           [runnable_presets]
-
           Android="Android"
 
           [preset.0]
-
           name="Android"
           platform="Android"
           runnable=true
@@ -69,54 +72,22 @@ jobs:
           exclude_filter=""
           export_path=""
           patches=PackedStringArray()
-          patch_delta_encoding=false
-          patch_delta_compression_level_zstd=19
-          patch_delta_min_reduction=0.1
-          patch_delta_include_filters="*"
-          patch_delta_exclude_filters=""
           encryption_include_filters=""
           encryption_exclude_filters=""
-          seed=0
           encrypt_pck=false
           encrypt_directory=false
           script_export_mode=2
 
           [preset.0.options]
-
           custom_template/debug=""
           custom_template/release=""
           gradle_build/use_gradle_build=true
-          gradle_build/gradle_build_directory=""
-          gradle_build/android_source_template=""
-          gradle_build/compress_native_libraries=false
-          gradle_build/export_format=0
-          gradle_build/min_sdk=""
-          gradle_build/target_sdk=""
-          architectures/armeabi-v7a=false
           architectures/arm64-v8a=true
-          architectures/x86=false
-          architectures/x86_64=false
-          version/code=1
-          version/name="1.0.0"
           package/unique_name="com.robot.control"
           package/name="RobotControlVR"
           package/signed=true
-          package/app_category=0
-          package/retain_data_on_uninstall=false
-          package/exclude_from_recents=false
-          package/show_in_android_tv=true
-          package/show_in_app_library=true
-          package/show_as_launcher_app=true
-          graphics/opengl_debug=false
           xr_features/xr_mode=1
           screen/immersive_mode=true
-          screen/support_small=true
-          screen/support_normal=true
-          screen/support_large=true
-          screen/support_xlarge=true
-          screen/background_color=Color(0, 0, 0, 1)
-          splash_screen/disable_godot_boot_splash=false
-          xr_features/enable_openxr_validation_layers=false
           EOF
 
       - name: Create build folder
