@@ -37,9 +37,12 @@ jobs:
 
       - name: Install Android Build Template
         run: |
-          # Vraag Godot om automatisch de Android build template in het project uit te pakken
           godot --headless --install-android-build-template
-          ls -la android/build
+
+      - name: Import Project Assets
+        run: |
+          # Laat Godot eenmalig in headless modus opstarten om alle .import bestanden en UID's te genereren
+          godot --headless --editor --quit || true
 
       - name: Create build folder
         run: mkdir -p build/android
