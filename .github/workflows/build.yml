@@ -35,20 +35,10 @@ jobs:
           mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
           rm Godot_v4.3-stable_export_templates.tpz Godot_v4.3-stable_linux.x86_64.zip
 
-      - name: Install Android Build Template
+      - name: Generate APK Directly
         run: |
-          godot --headless --install-android-build-template
-
-      - name: Import Project Assets
-        run: |
-          # Laat Godot eenmalig in headless modus opstarten om alle .import bestanden en UID's te genereren
-          godot --headless --editor --quit || true
-
-      - name: Create build folder
-        run: mkdir -p build/android
-
-      - name: Generate APK
-        run: |
+          mkdir -p build/android
+          # Exporteer direct zonder storende cli-install commando's
           godot --verbose --headless --export-release "Android" build/android/robot-control.apk
 
       - name: Upload APK Artifact
