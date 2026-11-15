@@ -35,15 +35,41 @@ jobs:
           mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
           rm Godot_v4.3-stable_export_templates.tpz Godot_v4.3-stable_linux.x86_64.zip
 
-      - name: Download and Setup Android Build Template Manually
+      - name: Inject Valid Export Preset
         run: |
-          # Download de officiële Android build-map voor Godot 4.3 rechtstreeks van GitHub en zet hem in de projectmap
-          mkdir -p android
-          wget -q https://github.com/godotengine/godot-build-scripts/archive/refs/heads/main.zip -O build-scripts.zip || true
-          # Als fallback maken we een schone mappenstructuur aan die Gradle en OpenXR accepteren
-          mkdir -p android/build/libs/debug android/build/libs/release
-          touch android/build/build.gradle android/build/settings.gradle
-          echo "android { namespace 'com.robot.control' }" > android/build/build.gradle
+          # Overschrijf of maak een100% correcte export_presets.cfg aan die Godot 4.3 vereist
+          cat << 'EOF' > export_presets.cfg
+          [runnable_presets]
+          Android="Android"
+
+          [preset.0]
+          name="Android"
+          platform="Android"
+          runnable=true
+          dedicated_server=false
+          custom_features=""
+          export_filter="all_resources"
+          include_filter=""
+          exclude_filter=""
+          export_path=""
+          patches=PackedStringArray()
+          encryption_include_filters=""
+          encryption_exclude_filters=""
+          encrypt_pck=false
+          encrypt_directory=false
+          script_export_mode=2
+
+          [preset.0.options]
+          custom_template/debug=""
+          custom_template/release=""
+          gradle_build/use_gradle_build=false
+          architectures/arm64-v8a=true
+          package/unique_name="com.robot.control"
+          package/name="RobotControlVR"
+          package/signed=true
+          xr_features/xr_mode=1
+          screen/immersive_mode=true
+          EOF
 
       - name: Create build folder
         run: mkdir -p build/android
