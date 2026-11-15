@@ -35,10 +35,16 @@ jobs:
           mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
           rm Godot_v4.3-stable_export_templates.tpz Godot_v4.3-stable_linux.x86_64.zip
 
-      - name: Generate APK Directly
+      - name: Generate Android Build Template
         run: |
-          mkdir -p build/android
-          # Exporteer direct zonder storende cli-install commando's
+          # Genereer automatisch de ontbrekende android build map zodat OpenXR en Gradle tevreden zijn
+          godot --headless --install-android-build-template
+
+      - name: Create build folder
+        run: mkdir -p build/android
+
+      - name: Generate APK
+        run: |
           godot --verbose --headless --export-release "Android" build/android/robot-control.apk
 
       - name: Upload APK Artifact
