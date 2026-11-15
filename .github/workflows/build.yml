@@ -2,8 +2,7 @@ name: Build Quest 3 APK
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -35,6 +34,12 @@ jobs:
           unzip -q Godot_v4.3-stable_export_templates.tpz
           mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
           rm Godot_v4.3-stable_export_templates.tpz Godot_v4.3-stable_linux.x86_64.zip
+
+      - name: Install Android Build Template
+        run: |
+          # Vraag Godot om automatisch de Android build template in het project uit te pakken
+          godot --headless --install-android-build-template
+          ls -la android/build
 
       - name: Create build folder
         run: mkdir -p build/android
